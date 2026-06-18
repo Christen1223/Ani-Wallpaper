@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>New Tab</title>
+        <link rel="stylesheet" href="new_tab.css" />
+    </head>
+
+    <body>
+        <div id="wallpaper-bg"></div>
+
+        <div id="overlay">
+            <div id="time-display"></div>
+            <div id="date-display"></div>
+            <div id="weather-display"></div>
+        </div>
+
+        <div id="settings-overlay" class="hidden">
+            <div id="settings-panel">
+
+                <div class="header">
+                    <span class="header-title">Ani-Wallpaper</span>
+                    <button id="close-settings-btn">✕</button>
+                </div>
+
+                <div class="section">
+                    <div class="section-label-main">Wallpaper Source</div>
+                    
+                    <div class="toggle-row">
+                        <span class="toggle-label">Weather</span>
+                        <label class="switch">
+                            <input type="checkbox" class="toggle-btn" data-mode="weather">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-row">
+                        <span class="toggle-label">Vibe</span>
+                        <label class="switch">
+                            <input type="checkbox" class="toggle-btn" data-mode="vibe">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-row">
+                        <span class="toggle-label">Personal</span>
+                        <label class="switch">
+                            <input type="checkbox" class="toggle-btn" data-mode="personal">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-row">
+                        <span class="toggle-label">Search</span>
+                        <label class="switch">
+                            <input type="checkbox" class="toggle-btn" data-mode="search">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="section" id="location-section" style="display:none">
+                    <div class="section-label">Location</div>
+                    <div class="location-input-container">
+                        <input type="text" id="location-input" placeholder="Search for a city..." autocomplete="off" />
+                        <button id="detect-location-btn" class="small-btn">📍 Use My Location</button>
+                    </div>
+                    <div id="detect-status"></div>
+                    <ul id="location-suggestions"></ul>
+                </div>
+
+                <div class="section" id="folders-section" style="display:none">
+                    <div class="section-label">Personal Folder</div>
+                    <select id="personal-folder-select"></select>
+                    <div id="active-folder-name" class="section-subtext">✅ Active: None</div>
+                </div>
+
+                <div class="section" id="search-section" style="display:none">
+                    <div class="section-label">Search Query</div>
+                    <input type="text" id="search-input" placeholder="e.g. anime rainy night city wallpaper" autocomplete="off" />
+                </div>
+
+                <div class="section">
+                    <div class="section-label">Update Interval</div>
+                    <select id="interval-select"></select>
+                </div>
+            </div>
+        </div>
+
+        <div id="folders-overlay" class="hidden">
+            <div id="folders-panel">
+                <div class="header">
+                    <span class="header-title">Folders</span>
+                    <button id="close-folders-btn">✕</button>
+                </div>
+
+                <div class="section folders-top-actions">
+                    <button id="create-folder-top-btn" class="small-btn">+ Create Folder</button>
+                    <input type="text" id="folder-search-input" placeholder="Search folders..." autocomplete="off" />
+                </div>
+
+                <div id="folders-status" class="folders-status"></div>
+                <div id="folders-gallery" class="folders-gallery"></div>
+            </div>
+        </div>
+
+        <div id="folder-detail-overlay" class="hidden">
+            <div id="folder-detail-panel">
+                <div class="header">
+                    <span id="folder-detail-title" class="header-title">Folder</span>
+                    <button id="close-folder-detail-btn">✕</button>
+                </div>
+                <div id="folder-detail-status" class="folders-status"></div>
+                <div id="folder-images-gallery" class="folder-images-gallery"></div>
+            </div>
+        </div>
+
+        <button id="settings-btn" title="Settings">⚙</button>
+        <button id="folders-btn" title="Folders">📁</button>
+
+        <div id="wallpaper-context-menu" class="wallpaper-context-menu hidden">
+            <button id="context-change-wallpaper-btn" type="button" class="wallpaper-context-menu-item">Change wallpaper now</button>
+            <button id="context-add-folder-btn" type="button" class="wallpaper-context-menu-item">Add wallpaper to folder...</button>
+        </div>
+
+        <div id="folder-image-context-menu" class="wallpaper-context-menu hidden">
+            <button id="img-action-delete-btn" type="button" class="wallpaper-context-menu-item">Remove image</button>
+            <button id="img-action-move-btn" type="button" class="wallpaper-context-menu-item">Move to different folder</button>
+            <button id="img-action-copy-btn" type="button" class="wallpaper-context-menu-item">Copy to different folder</button>
+            <button id="img-action-set-active-btn" type="button" class="wallpaper-context-menu-item">Set as active wallpaper</button>
+        </div>
+
+        <template id="folder-card-template">
+            <div class="folder-card">
+                <div class="folder-icon">📁</div>
+                <div class="folder-name"></div>
+                <div class="folder-meta"></div>
+                <div class="folder-actions">
+                    <button type="button" class="small-btn folder-primary-btn"></button>
+                    <button type="button" class="small-btn secondary folder-secondary-btn">Add by URL</button>
+                </div>
+            </div>
+        </template>
+
+        <template id="folder-empty-template">
+            <div class="folder-card">
+                <div class="folder-name">No folders found</div>
+            </div>
+        </template>
+
+        <script src="constants.js"></script>
+        <script src="storage.js"></script>
+        <script src="settings.js"></script>
+        <script src="wallpaper_logic.js"></script>
+        <script src="new_tab.js"></script>
+    </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "AniPaper",
+  "description": "Anime wallpaper new tab extension.",
+  "version": "0.1.0",
+  "permissions": ["storage", "geolocation", "alarms"],
+  "host_permissions": [
+    "https://api.open-meteo.com/*",
+    "https://geocoding-api.open-meteo.com/*",
+    "https://serpapi.com/*",
+    "https://nominatim.openstreetmap.org/*"
+  ],
+  "chrome_url_overrides": {
+    "newtab": "new_tab.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

@@ -1,0 +1,722 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background-color: #111;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ===============================================
+    Wallpaper Background
+    ============================================== */
+#wallpaper-bg {
+  position: fixed;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition: opacity 0.8s ease;
+}
+
+/* ===============================================
+    Overlay - time, date, weather
+    ============================================== */
+#overlay {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    color: white;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+    user-select: none;
+}
+
+#time-display {
+    font-size: 80px;
+    font-weight: 200;
+    letter-spacing: -2px;
+    line-height: 1;
+}
+
+#date-display {
+    font-size: 18px;
+    font-weight: 400;
+    margin-top: 8px;
+    opacity: 0.85;
+}
+
+#weather-display {
+  font-size: 15px;
+  font-weight: 400;
+  margin-top: 6px;
+  opacity: 0.7;
+}
+
+/* ===============================================
+    Settings Button
+    ============================================== */
+
+#settings-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0);
+    color: white;
+    font-size: 25px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#settings-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+#folders-btn {
+    position: fixed;
+    top: 64px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0);
+    color: white;
+    font-size: 21px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#folders-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Global settings typography and panel styling */
+#settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#folders-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#folder-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#folder-detail-overlay.hidden {
+  display: none;
+}
+
+#folders-overlay.hidden {
+  display: none;
+}
+
+#folders-panel {
+  width: 540px;
+  max-width: calc(100vw - 36px);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #1c1c1e;
+  border-radius: 16px;
+  border: 1px solid #2c2c2e;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+#folder-detail-panel {
+  width: 760px;
+  max-width: calc(100vw - 36px);
+  max-height: 84vh;
+  overflow-y: auto;
+  background: #1c1c1e;
+  border-radius: 16px;
+  border: 1px solid #2c2c2e;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+#close-folders-btn {
+  background: none;
+  border: none;
+  color: #8e8e93;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+#close-folder-detail-btn {
+  background: none;
+  border: none;
+  color: #8e8e93;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+#close-folder-detail-btn:hover {
+  color: #ffffff;
+  background: #2c2c2e;
+}
+
+#close-folders-btn:hover {
+  color: #ffffff;
+  background: #2c2c2e;
+}
+
+.folders-top-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.folders-status {
+  color: #8e8e93;
+  font-size: 13px;
+  margin-top: -6px;
+  margin-bottom: 12px;
+  min-height: 18px;
+}
+
+.folders-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+}
+
+.folder-images-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.folder-image-card {
+  background: #232325;
+  border: 1px solid #2c2c2e;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: context-menu;
+}
+
+.folder-image-thumb {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+  background: #2c2c2e;
+}
+
+.folder-image-caption {
+  color: #8e8e93;
+  font-size: 11px;
+  padding: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-card {
+  background: #232325;
+  border: 1px solid #2c2c2e;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.folder-card.active {
+  border-color: #14a3a3;
+  box-shadow: 0 0 0 1px rgba(20, 163, 163, 0.35) inset;
+}
+
+.folder-icon {
+  font-size: 28px;
+}
+
+.folder-name {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  width: 100%;
+  word-break: break-word;
+}
+
+.folder-meta {
+  color: #8e8e93;
+  font-size: 12px;
+}
+
+.folder-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#settings-overlay.hidden {
+  display: none;
+}
+
+#settings-panel {
+  width: 380px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #1c1c1e; /* Standard premium dark mode grey */
+  border-radius: 16px;
+  border: 1px solid #2c2c2e;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Header UI elements */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+
+#close-settings-btn {
+  background: none;
+  border: none;
+  color: #8e8e93;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 50%;
+  transition: all 0.15s;
+}
+
+#close-settings-btn:hover {
+  color: #ffffff;
+  background: #2c2c2e;
+}
+
+/* Section styling */
+.section {
+  margin-bottom: 20px;
+}
+
+.section-label-main {
+  color: #8e8e93;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.section-label {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.section-subtext {
+  color: #8e8e93;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#folders-section {
+  width: 100%;
+}
+
+#personal-folder-select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+}
+
+#active-folder-name {
+  display: block;
+  margin-top: 8px;
+}
+
+/* Switch Row Layout */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #2c2c2e;
+}
+
+.toggle-row:last-child {
+  border-bottom: none;
+}
+
+.toggle-label {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+/* Custom Toggle Switch (Matches image 2) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 51px;
+  height: 31px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider tracking background */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #e9e9ea; /* Light gray for off-state if desired, or use #3a3a3c for dark mode off-state */
+  background-color: #3a3a3c; 
+  transition: .25s ease;
+  border-radius: 34px;
+}
+
+/* The circular toggle knob */
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 27px;
+  width: 27px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* Checked / Active State (Teal background matching your reference image) */
+input:checked + .slider {
+  background-color: #14a3a3; 
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Dropdown styling updates to match */
+#interval-select {
+  width: 100%;
+  background: #2c2c2e;
+  border: none;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+}
+
+#personal-folder-select {
+  width: 100%;
+  background: #2c2c2e;
+  border: none;
+  color: white;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 15px;
+  outline: none;
+  margin-bottom: 10px;
+}
+
+/* Container spacing updates */
+.section {
+  margin-bottom: 24px;
+}
+
+/* Header spacing for rows with actions on the right (like Personal Folders) */
+.section-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Adjust standard section labels to match the premium typography */
+.section-label {
+  color: #8e8e93;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+/* Reset individual margin rules if header row handles it */
+.section-header-row .section-label {
+  margin-bottom: 0;
+}
+
+/* Text Inputs (Clean, iOS-inspired dark mode styling) */
+input[type="text"] {
+  width: 100%;
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
+  color: #ffffff;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+input[type="text"]:focus {
+  border-color: #14a3a3; /* Teal accent matches the toggle switch */
+  background: #3a3a3c;
+}
+
+/* Location Group Layout */
+.location-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Primary Small Buttons */
+.small-btn {
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.small-btn:hover {
+  background: #3a3a3c;
+  border-color: #48484a;
+}
+
+/* Subtle Link/Action Button (e.g., + New Folder) */
+.link-btn {
+  background: none;
+  border: none;
+  color: #14a3a3; /* Matching teal accent */
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.link-btn:hover {
+  background: rgba(20, 163, 163, 0.1);
+}
+
+/* Folder Form UI Group */
+.folder-form-container {
+  background: #232325;
+  border: 1px solid #2c2c2e;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Secondary Cancel Button styling */
+.small-btn.secondary {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #aeaeb2;
+}
+
+.small-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Location Section Layout Fixes (Isolated by ID)
+   ========================================================================== */
+
+/* Force this section to layout its contents vertically from top to bottom */
+#location-section {
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure the location text label takes up the entire top line */
+#location-section .section-label {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* Make the input box container stretch across the panel below the title */
+#location-section .location-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Force both elements to look completely aligned, clean, and proportional */
+#location-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#detect-location-btn {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px; /* Matches the vertical padding height of the text box */
+}
+
+/* Dropdown suggestion container alignment */
+#location-suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 0 0;
+  background: #2c2c2e;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#location-suggestions li {
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#location-suggestions li:hover {
+  background: #3a3a3c;
+}
+
+#detect-status {
+  color: #8e8e93;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Wallpaper context menu */
+.wallpaper-context-menu {
+  z-index: 200;
+  min-width: 210px;
+  background: rgba(28, 28, 30, 0.98);
+  border: 1px solid #2c2c2e;
+  border-radius: 10px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  padding: 6px;
+}
+
+.wallpaper-context-menu-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #fff;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.wallpaper-context-menu-item:hover {
+  background: #3a3a3c;
+}
+
+
+
