@@ -81,8 +81,9 @@ function buildCorsHeaders(origin) {
 }
 
 function writeJson(req, res, statusCode, payload, extraHeaders = {}) {
-  const cors = buildCorsHeaders(req.headers.origin);
-
+  const clientOrigin = req.headers.origin || '*';
+  const cors = buildCorsHeaders(clientOrigin);
+  
   res.writeHead(statusCode, {
     "Content-Type": "application/json",
     "X-Content-Type-Options": "nosniff",
