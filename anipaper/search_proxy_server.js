@@ -3,6 +3,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { URL } = require("node:url");
 
+// ============================================================================
+// LOCAL DEVELOPMENT ONLY: Load .env file from disk
+// In production (e.g., Render), environment variables are set in the dashboard
+// and this code is NOT executed. Comment out if deploying without .env file.
+// ============================================================================
+/*
 function loadEnvFile() {
   const envPath = path.resolve(__dirname, ".env");
   if (!fs.existsSync(envPath)) return;
@@ -30,6 +36,7 @@ function loadEnvFile() {
 }
 
 loadEnvFile();
+*/
 
 const PORT = Number(process.env.PORT || 8787);
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
@@ -83,7 +90,7 @@ function buildCorsHeaders(origin) {
 function writeJson(req, res, statusCode, payload, extraHeaders = {}) {
   const clientOrigin = req.headers.origin || '*';
   const cors = buildCorsHeaders(clientOrigin);
-  
+
   res.writeHead(statusCode, {
     "Content-Type": "application/json",
     "X-Content-Type-Options": "nosniff",
