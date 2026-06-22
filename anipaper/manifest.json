@@ -7,8 +7,8 @@
   "host_permissions": [
     "https://api.open-meteo.com/*",
     "https://geocoding-api.open-meteo.com/*",
-    "https://serpapi.com/*",
-    "https://nominatim.openstreetmap.org/*"
+    "https://nominatim.openstreetmap.org/*",
+    "http://localhost:8787/*"
   ],
   "chrome_url_overrides": {
     "newtab": "new_tab.html"

@@ -1,5 +1,3 @@
-const searchAPIKey = "a397b44ca5a300d3b12af5c7fa4cb64b23fa3d770d46c7c6fabcb3fc97940e57";
-
 async function fetchWeatherConditions(latitude, longitude) {
     try {
         const weatherURL = `${WEATHER_API_BASE}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code`;
@@ -64,17 +62,13 @@ function buildWeatherQuery(weather, timeOfDay, season) {
 }
 
 async function searchImgs(searchQuery) {
-    const params = new URLSearchParams({
-        engine: "google_images",
-        q: searchQuery,
-        api_key: searchAPIKey,
-        ijn: 0
-    });
-
     try {
-        const response = await fetch(`${SERPAPI_BASE}?${params}`);
+        const params = new URLSearchParams({ q: searchQuery });
+        const response = await fetch(`${IMAGE_SEARCH_PROXY_BASE}?${params}`);
         const data = await response.json();
-        const imgs = data.images_results || [];
+        const imgs = Array.isArray(data.images)
+            ? data.images.map((url) => ({ original: url }))
+            : (data.images_results || []);
         const urls = [];
 
         for (const img of imgs) {

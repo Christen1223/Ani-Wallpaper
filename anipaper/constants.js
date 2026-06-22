@@ -1,5 +1,6 @@
 const WEATHER_API_BASE = "https://api.open-meteo.com/v1/forecast";
 const SERPAPI_BASE = "https://serpapi.com/search.json";
+const IMAGE_SEARCH_PROXY_BASE = "http://localhost:8787/search-images";
 
 const MODE_WEATHER  = "weather";
 const MODE_VIBE     = "vibe";

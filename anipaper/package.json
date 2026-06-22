@@ -1,0 +1,12 @@
+{
+  "name": "anipaper-search-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-safe search proxy for AniPaper extension",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node search_proxy_server.js"
+  }
+}
