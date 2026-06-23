@@ -63,7 +63,7 @@ function buildWeatherQuery(weather, timeOfDay, season) {
 
 async function searchImgs(searchQuery) {
     try {
-        const params = new URLSearchParams({ q: searchQuery });
+        const params = new URLSearchParams({ q: searchQuery, count: "30" });
         const response = await fetch(`${IMAGE_SEARCH_PROXY_BASE}?${params}`);
         const data = await response.json();
         const imgs = Array.isArray(data.images)
@@ -92,10 +92,117 @@ async function searchImgs(searchQuery) {
     }
 }
 
-async function fetchAndPickImg(searchQuery) {
+const wallpaperQueryPools = new Map();
+const READY_WALLPAPER_POOL_MINIMUM = 5;
+const READY_WALLPAPER_POOL_TARGET = 8;
+const VALIDATION_BATCH_SIZE = 8;
+const MAX_POOL_REFRESH_ATTEMPTS = 3;
+
+function normalizeWallpaperQueryKey(searchQuery) {
+    return String(searchQuery || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
+
+function shuffleArray(items) {
+    return [...items].sort(() => Math.random() - 0.5);
+}
+
+function getWallpaperQueryPool(searchQuery) {
+    const key = normalizeWallpaperQueryKey(searchQuery);
+
+    if (!wallpaperQueryPools.has(key)) {
+        wallpaperQueryPools.set(key, {
+            ready: [],
+            candidates: [],
+            cursor: 0,
+            pending: null,
+        });
+    }
+
+    return wallpaperQueryPools.get(key);
+}
+
+async function loadWallpaperPoolCandidates(pool, searchQuery) {
     const urls = await searchImgs(searchQuery);
-    if (!urls.length) return null;
-    return await pickValidImg(urls);
+    pool.candidates = [...new Set(shuffleArray(urls))];
+    pool.cursor = 0;
+}
+
+async function fillWallpaperPool(searchQuery, minimumReady = READY_WALLPAPER_POOL_MINIMUM) {
+    const pool = getWallpaperQueryPool(searchQuery);
+    if (pool.ready.length >= minimumReady) return pool;
+
+    if (pool.pending) {
+        await pool.pending;
+        return pool;
+    }
+
+    pool.pending = (async () => {
+        let refreshAttempts = 0;
+
+        while (pool.ready.length < READY_WALLPAPER_POOL_TARGET && refreshAttempts < MAX_POOL_REFRESH_ATTEMPTS) {
+            if (pool.cursor >= pool.candidates.length) {
+                await loadWallpaperPoolCandidates(pool, searchQuery);
+                refreshAttempts += 1;
+
+                if (!pool.candidates.length) {
+                    break;
+                }
+            }
+
+            const batch = pool.candidates
+                .slice(pool.cursor, pool.cursor + VALIDATION_BATCH_SIZE)
+                .filter((url) => typeof url === "string" && url.startsWith("https://") && !pool.ready.includes(url));
+
+            pool.cursor += VALIDATION_BATCH_SIZE;
+
+            if (!batch.length) {
+                continue;
+            }
+
+            const validatedBatch = await Promise.all(
+                batch.map(async (url) => ({ url, valid: await validateImgUrl(url) }))
+            );
+
+            for (const item of validatedBatch) {
+                if (item.valid && !pool.ready.includes(item.url)) {
+                    pool.ready.push(item.url);
+                }
+
+                if (pool.ready.length >= READY_WALLPAPER_POOL_TARGET) {
+                    break;
+                }
+            }
+        }
+    })();
+
+    try {
+        await pool.pending;
+    }
+    finally {
+        pool.pending = null;
+    }
+
+    return pool;
+}
+
+function refillWallpaperPoolInBackground(searchQuery) {
+    const pool = getWallpaperQueryPool(searchQuery);
+    if (pool.pending || pool.ready.length >= READY_WALLPAPER_POOL_MINIMUM) return;
+
+    fillWallpaperPool(searchQuery).catch(() => {});
+}
+
+async function fetchAndPickImg(searchQuery) {
+    const pool = await fillWallpaperPool(searchQuery, 1);
+    const nextUrl = pool.ready.shift();
+
+    if (!nextUrl) return null;
+
+    refillWallpaperPoolInBackground(searchQuery);
+    return { type: "url", value: nextUrl };
 }
 
 async function pickValidImg(urls) {

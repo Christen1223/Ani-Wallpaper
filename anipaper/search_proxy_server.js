@@ -14,7 +14,7 @@ const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || "*")
   .filter(Boolean);
 
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000);
-const RATE_LIMIT_MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 30);
+const RATE_LIMIT_MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 90);
 const CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS || 1000 * 60 * 60 * 6); // 6h
 const STALE_TTL_MS = Number(process.env.STALE_TTL_MS || 1000 * 60 * 60 * 24); // 24h
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 9_000);
@@ -240,6 +240,19 @@ const server = http.createServer(async (req, res) => {
   const page = Math.min(10, Math.max(0, Number(requestUrl.searchParams.get("page") || 0) || 0));
   const maxCount = Math.min(30, Math.max(1, Number(requestUrl.searchParams.get("count") || 20) || 20));
 
+  const cacheKey = `${normalizedQ}|${page}|${maxCount}`;
+  const cached = getCachedQuery(cacheKey);
+  if (cached.hit && !cached.stale) {
+    writeJson(
+      req,
+      res,
+      200,
+      { images: cached.data, cache: "hit" },
+      { "Cache-Control": "public, max-age=300" }
+    );
+    return;
+  }
+
   const clientIp = getClientIp(req);
   const rate = checkRateLimit(clientIp);
   if (!rate.allowed) {
@@ -249,23 +262,6 @@ const server = http.createServer(async (req, res) => {
       429,
       { error: "Rate limit exceeded" },
       {
-        "X-RateLimit-Remaining": String(rate.remaining),
-        "X-RateLimit-Reset": String(rate.resetAt),
-      }
-    );
-    return;
-  }
-
-  const cacheKey = `${normalizedQ}|${page}|${maxCount}`;
-  const cached = getCachedQuery(cacheKey);
-  if (cached.hit && !cached.stale) {
-    writeJson(
-      req,
-      res,
-      200,
-      { images: cached.data, cache: "hit" },
-      {
-        "Cache-Control": "public, max-age=300",
         "X-RateLimit-Remaining": String(rate.remaining),
         "X-RateLimit-Reset": String(rate.resetAt),
       }
