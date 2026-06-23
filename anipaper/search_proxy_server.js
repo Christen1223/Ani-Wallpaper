@@ -3,48 +3,16 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { URL } = require("node:url");
 
-// ============================================================================
-// LOCAL DEVELOPMENT ONLY: Load .env file from disk
-// In production (e.g., Render), environment variables are set in the dashboard
-// and this code is NOT executed. Comment out if deploying without .env file.
-// ============================================================================
-/*
-function loadEnvFile() {
-  const envPath = path.resolve(__dirname, ".env");
-  if (!fs.existsSync(envPath)) return;
-
-  const raw = fs.readFileSync(envPath, "utf8");
-  const lines = raw.split(/\r?\n/);
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-
-    const eqIndex = trimmed.indexOf("=");
-    if (eqIndex <= 0) continue;
-
-    const key = trimmed.slice(0, eqIndex).trim();
-    let value = trimmed.slice(eqIndex + 1).trim();
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
-    }
-
-    if (!(key in process.env)) {
-      process.env[key] = value;
-    }
-  }
-}
-
-loadEnvFile();
-*/
-
 const PORT = Number(process.env.PORT || 8787);
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
 const NODE_ENV = String(process.env.NODE_ENV || "development");
+
+// Parses the allowed origins from Render Environment Variables
 const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || "*")
   .split(",")
   .map((v) => v.trim())
   .filter(Boolean);
+
 const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000);
 const RATE_LIMIT_MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX_REQUESTS || 30);
 const CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS || 1000 * 60 * 60 * 6); // 6h
@@ -66,18 +34,28 @@ function getClientIp(req) {
   if (typeof forwarded === "string" && forwarded.length) {
     return forwarded.split(",")[0].trim();
   }
-
   return req.socket.remoteAddress || "unknown";
 }
 
+// FIXED: Gracefully accepts "null" or missing origins if we are locked down to an extension
 function isAllowedOrigin(origin) {
   if (!origin) return true;
   if (ALLOWED_ORIGINS.includes("*")) return true;
+  
+  // If the origin is the string literal "null", allow it if an extension is authorized
+  if (origin === "null" && ALLOWED_ORIGINS.some(o => o.startsWith("chrome-extension://"))) {
+    return true;
+  }
+  
   return ALLOWED_ORIGINS.includes(origin);
 }
 
+// FIXED: Dynamically returns the correct headers without breaking on "null"
 function buildCorsHeaders(origin) {
-  const allowOrigin = isAllowedOrigin(origin) ? (ALLOWED_ORIGINS.includes("*") ? "*" : origin) : "null";
+  const extensionFallback = ALLOWED_ORIGINS.find(o => o.startsWith("chrome-extension://")) || "*";
+  const allowOrigin = isAllowedOrigin(origin) 
+    ? (origin && origin !== "null" ? origin : extensionFallback) 
+    : "null";
 
   return {
     "Access-Control-Allow-Origin": allowOrigin,
@@ -205,11 +183,9 @@ async function fetchSerpImages(query, page, maxCount) {
 
 setInterval(() => {
   const now = Date.now();
-
   for (const [ip, entry] of rateLimitStore.entries()) {
     if (entry.resetAt < now) rateLimitStore.delete(ip);
   }
-
   for (const [query, entry] of queryCache.entries()) {
     if (entry.staleUntil < now) queryCache.delete(query);
   }
@@ -233,7 +209,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (req.method !== "GET" || requestUrl.pathname !== "/search-images") {
+  // FIXED: Accepts both the root "/" route and "/search-images" route to support your extension url layout
+  if (req.method !== "GET" || (requestUrl.pathname !== "/search-images" && requestUrl.pathname !== "/")) {
     writeJson(req, res, 404, { error: "Not found" });
     return;
   }
@@ -346,10 +323,5 @@ server.listen(PORT, () => {
   if (!SERPAPI_KEY || SERPAPI_KEY.includes("replace_with")) {
     console.warn("[WARN] SERPAPI_KEY is missing or placeholder. Search endpoint will fail.");
   }
-
-  if (ALLOWED_ORIGINS.includes("*")) {
-    console.warn("[WARN] ALLOWED_ORIGINS=* (open CORS). Set explicit origins in production.");
-  }
-
   console.log(`Image proxy running on http://localhost:${PORT} (${NODE_ENV})`);
 });
